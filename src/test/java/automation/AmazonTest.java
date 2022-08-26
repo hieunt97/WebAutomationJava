@@ -7,11 +7,6 @@ import org.testng.annotations.*;
 import pages.AmazonPage;
 import utils.CommonService;
 
-import java.awt.*;
-import java.awt.event.KeyEvent;
-import java.util.ArrayList;
-import java.util.Set;
-
 /**
  * @author hieunt
  * @since 24/08/2022
@@ -28,7 +23,7 @@ public class AmazonTest extends BaseTest{
         commonService = new CommonService(driver);
     }
 
-    @Test(priority = 1)
+    @Test
     public void searchAmazon() throws InterruptedException {
         amazonPage = new AmazonPage(driver);
         amazonPage.enterSearchValue("iPhone 11");

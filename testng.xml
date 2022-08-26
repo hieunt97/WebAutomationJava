@@ -3,11 +3,10 @@
 <suite name="All Test Suite">
     <test verbose="2" preserve-order="true" name="Web Test">
         <classes>
-            <class name="automation.AmazonTest">
-            </class>
             <class name="automation.EbayTest">
+            </class>
+            <class name="automation.AmazonTest">
             </class>
         </classes>
     </test>
-
 </suite>

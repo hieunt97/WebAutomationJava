@@ -1,9 +1,7 @@
 package pages;
 
-import org.openqa.selenium.By;
-import org.openqa.selenium.Keys;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
+import model.Product;
+import org.openqa.selenium.*;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
@@ -13,6 +11,7 @@ import utils.CommonService;
 
 import javax.xml.bind.Element;
 import java.security.Key;
+import java.util.ArrayList;
 import java.util.List;
 
 public class AmazonPage {
@@ -25,55 +24,67 @@ public class AmazonPage {
         commonService = new CommonService(driver);
     }
 
-    @FindBy(id="twotabsearchtextbox")
+    @FindBy(name = "field-keywords")
     WebElement inputSearch;
 
-    @FindBy(xpath="//span[contains(text(),'results for')]")
+    @FindBy(xpath = "//span[contains(text(),'results for')]")
     WebElement resultSearch;
 
-    @FindBy(id="s-result-sort-select")
+    @FindBy(id = "s-result-sort-select")
     WebElement labelSort;
 
     By product_name = By.xpath("//span[@data-component-id='11']//div[2]//div[@data-component-type='s-search-result']//div[@class='a-section a-spacing-small a-spacing-top-small']");
-    By product_price = By.xpath("//span[@data-component-id='11']//div[2]//div[@data-component-type='s-search-result']//div[@class='a-row a-size-base a-color-base']//span[@class='a-price']");
-    By product_link = By.xpath("//span[@data-component-id='11']//div[2]//div[@data-component-type='s-search-result']//a[@class='a-link-normal s-no-outline']");
 
     public void enterSearchValue(String value) {
         commonService.setTextValue(inputSearch, value);
         inputSearch.sendKeys(Keys.ENTER);
     }
 
-    public void Result(){
+    public void Result() {
         String act_ResultDisplay = resultSearch.getText();
         System.out.println(act_ResultDisplay);
 //        Assert.assertEquals(act_ResultDisplay, "1-16 of 457 results for");
     }
 
-    public void isDisplayResult(){
+    public void isDisplayResult() {
         //return resultSearch.isDisplayed();
         Assert.assertTrue(resultSearch.isDisplayed());
     }
 
-    public void sortByPrice(String text){
+    public void sortByPrice(String text) {
         commonService.selectOptionByVisibleText(labelSort, text);
         commonService.waitForPageLoad();
     }
 
-    public void getAllProducts(){
-        List<WebElement> productName_list = driver.findElements(product_name);
-        System.out.println("Total product:" + productName_list.size());
+    public List<Product> getAllProducts() {
         Actions action = new Actions(driver);
-        String nameURL = driver.getTitle();
-        System.out.println(nameURL);
-        System.out.println("---------------");
+        List<WebElement> elementList = driver.findElements(By.xpath("//div[@data-component-type='s-search-result']//div[@class='a-section']//div[@class='a-section a-spacing-small a-spacing-top-small']"));
+        commonService.waitForPageLoad();
+        System.out.println("Name web: " + driver.getTitle());
+        List<Product> listProduct = new ArrayList<>();
 
-        for(WebElement product: productName_list) {
-            action.moveToElement(product).build().perform();
-            System.out.println(product.getText());
-            System.out.println("---------------");
+        for (WebElement e : elementList) {
+            action.moveToElement(e).build().perform();
+            Product product = new Product();
+            product.setProuductName(e.findElement(By.cssSelector("[class='a-size-medium a-color-base a-text-normal']")).getText());
+            try {
+                if (e.findElement(By.cssSelector("[class='a-price-whole']")).getText() != null) {
+                    product.setProductPrice(e.findElement(By.cssSelector("[class='a-price-whole']")).getText().concat("$"));
+                } else {
+                    product.setProductPrice("0.0");
+                }
+            }catch (NotFoundException ex){
+                product.setProductPrice("0.0");
+            }
+
+            product.setProductLink(e.findElement(By.cssSelector("[class='a-link-normal s-underline-text s-underline-link-text s-link-style a-text-normal']")).getAttribute("href"));
+            listProduct.add(product);
         }
 
-
+        for (Product product : listProduct) {
+            product.inforProduct();
+        }
+        return listProduct;
     }
 
 
